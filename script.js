@@ -6,8 +6,8 @@ function novaFrase() {
         localStorage.setItem("frase", JSON.parse(textJson).quote);
       });
   }
-cache();
-function cache(){
+getLocalStorage();
+function getLocalStorage(){
     if (localStorage.getItem("nome") != null) {
         nome.innerHTML =  localStorage.getItem("nome");
         imagem.src = localStorage.getItem("imagem");
@@ -50,7 +50,7 @@ async function novoPersonagem() {
   }
 }
 
-function removeCache() {
+function removeLocalStorage() {
     localStorage.removeItem("nome");
     localStorage.removeItem("imagem");
     localStorage.removeItem("especie");
