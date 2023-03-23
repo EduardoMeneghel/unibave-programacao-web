@@ -1,4 +1,3 @@
-<h1 align="center">unibave-programacao-web</h1>
 <h1 align="center">
     <a href="https://unibave-programacao-web.netlify.app/">unibave-programacao-web</a>
 </h1>
