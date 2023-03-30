@@ -2,11 +2,23 @@ function novaFrase() {
     fetch('https://api.kanye.rest/')
       .then(response => response.text())
       .then(textJson => {
-        document.getElementById('fetch').innerHTML = JSON.parse(textJson).quote;
+        document.getElementById('frase').innerHTML = JSON.parse(textJson).quote;
         localStorage.setItem("frase", JSON.parse(textJson).quote);
       });
-  }
+}
+
+function novoAluno() {
+  fetch('http://localhost:3002/')
+    .then((response) => response.json())
+    .then(aluno => {
+      document.getElementById('aluno').innerHTML = "Nome: "+aluno.nome+"<br>"+" Idade: "+aluno.idade+"<br>"+" Sexo: "+aluno.sexo;
+      localStorage.setItem("aluno", "Nome: "+aluno.nome+"<br>"+" Idade: "+aluno.idade+"<br>"+" Sexo: "+aluno.sexo);
+    });
+}
+
+
 getLocalStorage();
+
 function getLocalStorage(){
     if (localStorage.getItem("nome") != null) {
         nome.innerHTML =  localStorage.getItem("nome");
@@ -17,14 +29,20 @@ function getLocalStorage(){
         episodio.href = localStorage.getItem("episodio");
     }
     if (localStorage.getItem("frase") != null) {
-      document.getElementById('fetch').innerHTML = localStorage.getItem("frase");
+      document.getElementById('frase').innerHTML = localStorage.getItem("frase");
+    }
+    if (localStorage.getItem("aluno") != null) {
+      document.getElementById('aluno').innerHTML = localStorage.getItem("aluno");
     }
 }
 
 async function novoPersonagem() {
 
   try {
+
       const response = await fetch('https://rickandmortyapi.com/api');
+      
+      imagem.src = 'loading.gif';
 
       const data = await response.json();
       const page = Math.floor(Math.random() * 42);
@@ -33,7 +51,6 @@ async function novoPersonagem() {
       const numero = Math.floor(Math.random() * characters.results.length);
       const character = characters.results[numero];
       nome.innerHTML = character.name;
-      console.log(character);
       imagem.src = character.image;
       especie.innerHTML = character.species;
       tipo.innerHTML = character.type;
@@ -58,4 +75,5 @@ function removeLocalStorage() {
     localStorage.removeItem("genero");
     localStorage.removeItem("episodio");
     localStorage.removeItem("frase");
+    localStorage.removeItem("aluno");
 }
