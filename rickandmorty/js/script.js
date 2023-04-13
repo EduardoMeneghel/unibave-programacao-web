@@ -7,16 +7,6 @@ function novaFrase() {
       });
 }
 
-function novoAluno() {
-  fetch('http://localhost:3002/')
-    .then((response) => response.json())
-    .then(aluno => {
-      document.getElementById('aluno').innerHTML = "Nome: "+aluno.nome+"<br>"+" Idade: "+aluno.idade+"<br>"+" Sexo: "+aluno.sexo;
-      localStorage.setItem("aluno", "Nome: "+aluno.nome+"<br>"+" Idade: "+aluno.idade+"<br>"+" Sexo: "+aluno.sexo);
-    });
-}
-
-
 getLocalStorage();
 
 function getLocalStorage(){
