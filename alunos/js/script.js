@@ -1,3 +1,19 @@
+getAll()
+
+function getAll() {
+  fetch('http://localhost:3002/')
+    .then((response) => response.json())
+    .then(alunos => {
+      alunos.forEach(
+        aluno => {
+          let p = document.createElement("p")
+          p.innerHTML = "Codigo: "+aluno.codigo+"<br>"+"Nome: "+aluno.nome+"<br>"+" Idade: "+aluno.idade+"<br>"+" Sexo: "+aluno.sexo
+          document.getElementById('alunos').appendChild(p)
+        }
+        );
+    })
+}
+
 function getNovoAluno() {
   codigo = document.getElementById('codigo').value
   fetch('http://localhost:3002/'+codigo)

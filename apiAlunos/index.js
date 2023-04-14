@@ -86,6 +86,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+app.get('/',(requisicao, response) => {
+    response.json(alunos);
+})
+
 app.get('/:codigo',(requisicao, response) => {
     response.json(alunos.filter(aluno => aluno.codigo == requisicao.params.codigo)[0]);
 })
