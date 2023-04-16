@@ -6,9 +6,9 @@ function getAll() {
     .then(alunos => {
       alunos.forEach(
         aluno => {
-          let p = document.createElement("p")
-          p.innerHTML = "Codigo: "+aluno.codigo+"<br>"+"Nome: "+aluno.nome+"<br>"+" Idade: "+aluno.idade+"<br>"+" Sexo: "+aluno.sexo
-          document.getElementById('alunos').appendChild(p)
+          let tbody = document.createElement("tbody")
+          tbody.innerHTML = '<tr><th scope="row">'+aluno.codigo+'</th><td>'+aluno.nome+'</td><td>'+aluno.idade+'</td><td>'+aluno.sexo+'</td><td>'+'<a type="button" class="btn btn-danger" onclick="deleteNovoAluno('+aluno.codigo+')" ><img src="https://img.icons8.com/material-rounded/24/FFFFFF/filled-trash.png"/></a>'+'</td></tr>'
+          document.getElementById('alunos').appendChild(tbody)
         }
         );
     })
@@ -78,8 +78,13 @@ function putNovoAluno() {
   }
 }
 
-function deleteNovoAluno() {
-  let codigo =  document.getElementById('codigo').value
+function deleteNovoAluno(codigoAluno) {
+  let codigo;
+  if(!codigoAluno){
+    codigo =  document.getElementById('codigo').value
+  }else{
+    codigo = codigoAluno;
+  }
   if (codigo) {
     fetch('http://localhost:3002/alunos/'+codigo, {
         method: "DELETE",
