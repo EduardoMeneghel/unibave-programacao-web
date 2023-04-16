@@ -6,56 +6,52 @@ function getAll() {
     .then(alunos => {
       alunos.forEach(
         aluno => {
-          let tbody = document.createElement("tbody")
-          tbody.innerHTML = '<tr><th scope="row">'+aluno.codigo+'</th><td>'+aluno.nome+'</td><td>'+aluno.idade+'</td><td>'+aluno.sexo+'</td><td>'+'<a type="button" class="btn btn-danger" onclick="deleteNovoAluno('+aluno.codigo+')" ><img src="https://img.icons8.com/material-rounded/24/FFFFFF/filled-trash.png"/></a>'+'</td></tr>'
-          document.getElementById('alunos').appendChild(tbody)
+          let tr = document.createElement("tr")
+          tr.id = aluno.codigo;
+          tr.innerHTML = '<td scope="row">'+aluno.codigo+'</td><td>'+aluno.nome+'</td><td>'+aluno.idade+'</td><td>'+aluno.sexo+'</td><td>'+'<a type="button" class="btn btn-danger" onclick="excluirAluno('+aluno.codigo+')" ><img src="https://img.icons8.com/material-rounded/24/FFFFFF/filled-trash.png" width="20px"/></a>'+'<a type="button" class="btn btn-success" onclick="editarAluno('+aluno.codigo+')"><img src="https://img.icons8.com/external-anggara-glyph-anggara-putra/32/FFFFFF/external-edit-user-interface-anggara-glyph-anggara-putra.png" width="20px"/></a>'+'</td>'
+          document.getElementById('alunos').appendChild(tr)
         }
         );
     })
 }
 
-function getNovoAluno() {
-  codigo = document.getElementById('codigo').value
-  fetch('http://localhost:3002/'+codigo)
-    .then((response) => response.json())
-    .then(aluno => {
-      document.getElementById('aluno').innerHTML = "Codigo: "+aluno.codigo+"<br>"+"Nome: "+aluno.nome+"<br>"+" Idade: "+aluno.idade+"<br>"+" Sexo: "+aluno.sexo;
-      localStorage.setItem("aluno", "Codigo: "+aluno.codigo+"<br>"+"Nome: "+aluno.nome+"<br>"+" Idade: "+aluno.idade+"<br>"+" Sexo: "+aluno.sexo);
-    });
+function enviar(){
+  let codigo =  document.getElementById('codigo').textContent
+  if(codigo){
+    putAluno()
+  } else {
+    postAluno()
+  }
 }
 
-function postNovoAluno() {
-  let codigo =  document.getElementById('codigo').value
+function postAluno() {
   let nome =  document.getElementById('nome').value
   let idade = document.getElementById('idade').value
   let sexo = document.querySelector('input[name=sexo]:checked').id
-  if (codigo && nome && idade && sexo) {
+  if (nome && idade && sexo) {
     fetch('http://localhost:3002/alunos', {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          codigo: codigo,
           nome: nome,
           idade: idade,
           sexo: sexo
       })
-    }).then(function(result) {
-      if (result.status == 200) {
-        alert("Dado cadastrado com sucesso")
-      } else if (result.status == 400) {
-        alert("Código de aluno já existe")
-      }
-    })
-
+    }).then(response => response.json())
+    .then(
+      data => inserirTabelaAluno(data),
+      alert("Aluno cadastrado com sucesso")
+      )
+    .catch(error => console.error(error));
   } else {
     alert("Dado não preenchido")
   }
 }
 
-function putNovoAluno() {
-  let codigo =  document.getElementById('codigo').value
+function putAluno() {
+  let codigo =  document.getElementById('codigo').textContent
   let nome =  document.getElementById('nome').value
   let idade = document.getElementById('idade').value
   let sexo = document.querySelector('input[name=sexo]:checked').id
@@ -71,20 +67,27 @@ function putNovoAluno() {
           idade: idade,
           sexo: sexo
       })
-    });
-    alert("Aluno Alterado!")
+    }).then(
+      alterarTabelaAluno(codigo),
+      limpar(),
+      alert("Alterado com successo!")
+    );
+    
   } else {
     alert("Dado não preenchido")
   }
 }
 
-function deleteNovoAluno(codigoAluno) {
-  let codigo;
-  if(!codigoAluno){
-    codigo =  document.getElementById('codigo').value
-  }else{
-    codigo = codigoAluno;
-  }
+function editarAluno(codigo) {
+  let tr =  document.getElementById(codigo)
+  var celulas = tr.querySelectorAll('td');
+  document.getElementById('codigo').innerHTML = celulas[0].textContent;
+  document.getElementById('nome').value = celulas[1].textContent;
+  document.getElementById('idade').value = celulas[2].textContent;
+  document.getElementById(celulas[3].textContent).checked = true;
+}
+
+function excluirAluno(codigo) {
   if (codigo) {
     fetch('http://localhost:3002/alunos/'+codigo, {
         method: "DELETE",
@@ -93,13 +96,40 @@ function deleteNovoAluno(codigoAluno) {
         }
     }).then(function(result) {
       if (result.status == 200) {
-        alert("Aluno deletado com sucesso")
-      } else if (result.status == 400) {
-        alert("Código de aluno não já existe")
+        let tr =  document.getElementById(codigo)
+        tr.parentNode.removeChild(tr);
+      } else {
+        alert("Ocorreu um erro inesperado, Status: "+result.status)
       }
     });
   } else {
-    alert("Dado não preenchido")
+    alert("Código não encontrado")
   }
 }
-  
+
+function alterarTabelaAluno(codigo) {
+  let tr =  document.getElementById(codigo)
+  var celulas = tr.querySelectorAll('td');
+  celulas[0].innerHTML = document.getElementById('codigo').innerHTML;
+  celulas[1].innerHTML = document.getElementById('nome').value;
+  celulas[2].innerHTML = document.getElementById('idade').value;
+  celulas[3].innerHTML = document.querySelector('input[name=sexo]:checked').id;
+}
+
+function inserirTabelaAluno(codigo) {
+  fetch('http://localhost:3002/'+codigo)
+    .then((response) => response.json())
+      .then(aluno => {
+        let tr = document.createElement("tr")
+        tr.id = aluno.codigo;
+        tr.innerHTML = '<td scope="row">'+aluno.codigo+'</td><td>'+aluno.nome+'</td><td>'+aluno.idade+'</td><td>'+aluno.sexo+'</td><td>'+'<a type="button" class="btn btn-danger" onclick="excluirAluno('+aluno.codigo+')" ><img src="https://img.icons8.com/material-rounded/24/FFFFFF/filled-trash.png" width="20px"/></a>'+'<a type="button" class="btn btn-success" onclick="editarAluno('+aluno.codigo+')"><img src="https://img.icons8.com/external-anggara-glyph-anggara-putra/32/FFFFFF/external-edit-user-interface-anggara-glyph-anggara-putra.png" width="20px"/></a>'+'</td>'
+        document.getElementById('alunos').appendChild(tr)
+      })
+}
+
+function limpar() {
+  document.getElementById('codigo').innerHTML = '';
+  document.getElementById('nome').value = '';
+  document.getElementById('idade').value = '';
+  document.getElementById('M').checked = true;
+}
