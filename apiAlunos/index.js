@@ -1,83 +1,11 @@
-let alunos = [
-    {
-        codigo: 1,
-        nome: "Bruno R.",
-        idade: 26,
-        sexo: "F"
-    },
-    {
-        codigo: 2,
-        nome: "Julian",
-        idade: 21,
-        sexo: "M"
-    },
-    {
-        codigo: 3,
-        nome: "Juan",
-        idade: 20,
-        sexo: "M"
-    },
-    {
-        codigo: 4,
-        nome: "Douglas",
-        idade: 21,
-        sexo: "M"
-    },
-    {
-        codigo: 5,
-        nome: "Anselmo",
-        idade: 21,
-        sexo: "M"
-    },
-    {
-        codigo: 6,
-        nome: "Eduardo",
-        idade: 21,
-        sexo: "M"
-    },
-    {
-        codigo: 7,
-        nome: "Yvam",
-        idade: 22,
-        sexo: "M"
-    },
-    {
-        codigo: 8,
-        nome: "Leandro",
-        idade: 21,
-        sexo: "M"
-    },
-    {
-        codigo: 9,
-        nome: "João",
-        idade: 20,
-        sexo: "M"
-    },
-    {
-        codigo: 10,
-        nome: "Ilson",
-        idade: 21,
-        sexo: "M"
-    },
-    {
-        codigo: 11,
-        nome: "Bruno C.",
-        idade: 21,
-        sexo: "M"
-    },
-    {
-        codigo: 12,
-        nome: "Lucas",
-        idade: 21,
-        sexo: "M"
-    },
-    {
-        codigo: 13,
-        nome: "Victor",
-        idade: 22,
-        sexo: "M"
-    },
-]
+const mysql = require('mysql2');
+
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: '123',
+    database: 'alunosDB'
+});
 
 const http = require('http');
 const cors = require('cors');
@@ -86,63 +14,53 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get('/',(requisicao, response) => {
-    response.json(alunos);
+app.get('/',(request, response) => {
+    pool.getConnection((erro, conexao) => {
+        conexao.query('SELECT * FROM alunos', (erro, linhas, campos) => {
+            response.status(200).json(linhas);
+        });
+        conexao.release();
+    })
 })
 
-app.get('/:codigo',(requisicao, response) => {
-    response.json(alunos.filter(aluno => aluno.codigo == requisicao.params.codigo)[0]);
+app.get('/:codigo',(request, response) => {
+    pool.getConnection((erro, conexao) => {
+        conexao.query('SELECT * FROM alunos WHERE id = '+request.params.codigo, (erro, linhas, campos) => {
+            response.status(200).json(linhas);
+        });
+        conexao.release();
+    })
 })
 
-app.post('/alunos', (requisicao ,resposta) => {
-    let novoAluno = requisicao.body
-    novoAluno['codigo'] = novoCodigo(alunos)
-    alunos.push(novoAluno)
-    resposta.status(200).json(novoAluno['codigo'])
+app.post('/alunos', (request ,response) => {
+    pool.getConnection((erro, conexao) => {
+        conexao.query('INSERT INTO alunos (nm_name, nr_idade, tp_sexo) VALUES ('+"'"+request.body.nome+"'"+', '+request.body.idade+', '+"'"+request.body.sexo+"'"+');', (erro, linhas, campos) => {
+            response.status(200).json("aluno adicionado com sucesso!");
+        });
+        conexao.release();
+    })
 });
 
 
-app.put('/alunos', (requisicao ,resposta) => {
-    let novoAluno = requisicao.body;
-    let alunoExistente = alunos.filter(verificaSeCodigoExiste)
-    if(alunoExistente) {
-        alunos = alunos.filter(aluno => aluno.codigo != novoAluno.codigo);
-        alunos.push(novoAluno);
-        resposta.status(200).json("Aluno alterado com sucesso");
-    } else {
-        resposta.status(400).json("Código de aluno não cadastrado");
-    }
-
-    function verificaSeCodigoExiste(alunoArray) {
-        return alunoArray.codigo == novoAluno.codigo;
-    }
+app.put('/alunos', (request ,response) => {
+    pool.getConnection((erro, conexao) => {
+        conexao.query('SET nm_name='+"'"+request.body.nome+"'"+', nr_idade='+request.body.sexo+', tp_sexo='+"'"+request.body.sexo+"'"+'WHERE id='+"'"+request.body.codigo+"'"+';', (erro, linhas, campos) => {
+            response.status(200).json("ok");
+        });
+        conexao.release();
+    })
 })
 
-app.delete('/alunos/:codigo', (requisicao ,resposta) => {
-    let alunoExistente = alunos.filter(verificaSeCodigoExiste)
-    if(alunoExistente) {
-        alunos = alunos.filter(aluno => aluno.codigo != requisicao.params.codigo);
-        resposta.status(200).json("Aluno deletado com sucesso");
-    } else {
-        resposta.status(400).json("Código de aluno não cadastrado");
-    }
-
-    function verificaSeCodigoExiste(alunoArray) {
-        return alunoArray.codigo == requisicao.params.codigo;
-    }
+app.delete('/alunos/:codigo', (request ,response) => {
+    pool.getConnection((erro, conexao) => {
+        conexao.query('DELETE FROM alunos WHERE id='+request.params.codigo, (erro, linhas, campos) => {
+            response.status(200).json("aluno apagado com sucesso!");
+        });
+        conexao.release();
+    })
 })
 
 http.createServer({}, app).listen(3002,() => {
     console.log("Server on")
     //console.log(alunos[Math.floor(Math.random() * alunos.length)])
 });
-
-function novoCodigo(alunoArray) {
-    let maiorCodigo = 0;
-    alunoArray.forEach(function(aluno) {
-        if (aluno['codigo'] > maiorCodigo) {
-          maiorCodigo = aluno['codigo'];
-        }
-      });
-    return maiorCodigo+1;
-}
